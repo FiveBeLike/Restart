@@ -196,7 +196,7 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-        .modal-content .password-container {
+        .modal-content .password-container trabalhador {
             position: relative;
             margin-bottom: 10px;
         }
@@ -331,15 +331,15 @@
                 <h2>Secure Messenger</h2>
                 <button class="menu-btn" onclick="toggleMenu()">☰</button>
             </div>
-            <div class="sidebar-menu" id="sidebarMenu">
+            <div class decidere="sidebar-menu" id="sidebarMenu">
                 <ul>
-                    <li onclick="showSettings()">Settings</li>
-                    <li onclick="toggleTheme()">Toggle Theme</li>
-                    <li onclick="logout()">Logout</li>
+                    <li onclick="showSettings()">Настройки</li>
+                    <li onclick="toggleTheme()">Сменить тему</li>
+                    <li onclick="logout()">Выйти</li>
                 </ul>
             </div>
             <div class="user-search">
-                <input type="text" id="userSearch" placeholder="Search users...">
+                <input type="text" id="userSearch" placeholder="Поиск пользователей...">
                 <button onclick="searchUsers()">🔍</button>
             </div>
             <ul class="user-list" id="userList"></ul>
@@ -350,67 +350,84 @@
             </div>
             <div class="chat-messages" id="chatMessages"></div>
             <div class="chat-input">
-                <input type="text" id="messageInput" placeholder="Type a message...">
-                <button onclick="sendMessage()">Send</button>
+                <input type="text" id="messageInput" placeholder="Введите сообщение...">
+                <button onclick="sendMessage()">Отправить</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="loginModal">
         <div class="modal-content">
-            <h2>Login</h2>
-            <input type="text" id="loginUsername" placeholder="Username (A-Z, a-z, 0-9)">
+            <h2>Вход</h2>
+            <input type="text" id="loginUsername" placeholder="Имя пользователя (A-Z, a-z, 0-9)">
             <div class="password-container">
-                <input type="password" id="loginPassword" placeholder="Password">
+                <input type="password" id="loginPassword" placeholder="Пароль">
                 <button class="password-toggle" onmousedown="togglePassword('loginPassword')" onmouseup="togglePassword('loginPassword')" onmouseout="togglePassword('loginPassword')">👁️</button>
             </div>
-            <button onclick="login()">Login</button>
-            <button onclick="showRegisterModal()">Register</button>
+            <button onclick="login()">Войти</button>
+            <button onclick="showRegisterModal()">Регистрация</button>
         </div>
     </div>
 
     <div class="modal" id="registerModal">
         <div class="modal-content">
-            <h2>Register</h2>
-            <input type="text" id="registerUsername" placeholder="Username (A-Z, a-z, 0-9)">
-            <input type="text" id="registerDisplayName" placeholder="Display Name">
+            <h2>Регистрация</h2>
+            <input type="text" id="registerUsername" placeholder="Имя пользователя (A-Z, a-z, 0-9)">
+            <input type="text" id="registerDisplayName" placeholder="Отображаемое имя">
             <div class="password-container">
-                <input type="password" id="registerPassword" placeholder="Password">
+                <input type="password" id="registerPassword" placeholder="Пароль">
                 <button class="password-toggle" onmousedown="togglePassword('registerPassword')" onmouseup="togglePassword('registerPassword')" onmouseout="togglePassword('registerPassword')">👁️</button>
             </div>
-            <button onclick="register()">Register</button>
-            <button onclick="showLoginModal()">Back to Login</button>
+            <button onclick="register()">Зарегистрироваться</button>
+            <button onclick="showLoginModal()">Назад к входу</button>
         </div>
     </div>
 
     <div class="modal" id="settingsModal">
         <div class="modal-content">
-            <h2>Settings</h2>
+            <h2>Настройки</h2>
             <img id="profilePicture" src="https://via.placeholder.com/100" alt="Profile Picture">
             <input type="file" id="profilePictureInput" accept="image/*">
-            <input type="text" id="settingsUsername" placeholder="Change Username (A-Z, a-z, 0-9)">
-            <input type="text" id="settingsDisplayName" placeholder="Change Display Name">
-            <input type="text" id="settingsStatus" placeholder="Status Message">
+            <input type="text" id="settingsUsername" placeholder="Изменить имя пользователя (A-Z, a-z, 0-9)">
+            <input type="text" id="settingsDisplayName" placeholder="Изменить отображаемое имя">
+            <input type="text" id="settingsStatus" placeholder="Статус">
             <div class="password-container">
-                <input type="password" id="settingsCurrentPassword" placeholder="Current Password">
+                <input type="password" id="settingsCurrentPassword" placeholder="Текущий пароль">
                 <button class="password-toggle" onmousedown="togglePassword('settingsCurrentPassword')" onmouseup="togglePassword('settingsCurrentPassword')" onmouseout="togglePassword('settingsCurrentPassword')">👁️</button>
             </div>
             <div class="password-container">
-                <input type="password" id="settingsNewPassword" placeholder="New Password">
+                <input type="password" id="settingsNewPassword" placeholder="Новый пароль">
                 <button class="password-toggle" onmousedown="togglePassword('settingsNewPassword')" onmouseup="togglePassword('settingsNewPassword')" onmouseout="togglePassword('settingsNewPassword')">👁️</button>
             </div>
-            <label><input type="checkbox" id="settingsNotifications" checked> Enable Notifications</label>
-            <button onclick="updateSettings()">Save Changes</button>
-            <button onclick="closeSettings()">Close</button>
+            <label><input type="checkbox" id="settingsNotifications" checked> Включить уведомления</label>
+            <button onclick="updateSettings()">Сохранить изменения</button>
+            <button onclick="closeSettings()">Закрыть</button>
         </div>
     </div>
 
     <script>
-        const AES_KEY = 'my-secret-key-1234567890123456'; // 32 bytes for AES-256
+        const AES_KEY = 'my-secret-key-1234567890123456'; // 32 байта для AES-256
         let currentUser = null;
         let currentChatUser = null;
-        let users = JSON.parse(localStorage.getItem('users')) || {};
-        let messages = JSON.parse(localStorage.getItem('messages')) || {};
+        let users = {};
+        let messages = {};
+
+        // Инициализация данных из localStorage
+        function initializeData() {
+            try {
+                const storedUsers = localStorage.getItem('users');
+                const storedMessages = localStorage.getItem('messages');
+                users = storedUsers ? JSON.parse(storedUsers) : {};
+                messages = storedMessages ? JSON.parse(storedMessages) : {};
+                console.log('Данные загружены из localStorage:', { users, messages });
+            } catch (e) {
+                console.error('Ошибка загрузки данных из localStorage:', e);
+                users = {};
+                messages = {};
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('messages', JSON.stringify(messages));
+            }
+        }
 
         function showLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
@@ -427,11 +444,11 @@
         function showSettings() {
             document.getElementById('settingsModal').style.display = 'flex';
             document.getElementById('sidebarMenu').style.display = 'none';
-            document.getElementById('settingsUsername').value = currentUser.username || '';
-            document.getElementById('settingsDisplayName').value = currentUser.displayName || '';
-            document.getElementById('settingsStatus').value = users[currentUser.username].status || '';
-            document.getElementById('settingsNotifications').checked = users[currentUser.username].notifications !== false;
-            document.getElementById('profilePicture').src = users[currentUser.username].profilePicture || 'https://via.placeholder.com/100';
+            document.getElementById('settingsUsername').value = currentUser ? currentUser.username : '';
+            document.getElementById('settingsDisplayName').value = currentUser ? currentUser.displayName : '';
+            document.getElementById('settingsStatus').value = currentUser ? users[currentUser.username].status || '' : '';
+            document.getElementById('settingsNotifications').checked = currentUser ? users[currentUser.username].notifications !== false : true;
+            document.getElementById('profilePicture').src = currentUser ? users[currentUser.username].profilePicture || 'https://via.placeholder.com/100' : 'https://via.placeholder.com/100';
         }
 
         function closeSettings() {
@@ -461,28 +478,46 @@
             return Object.keys(users).some(u => u !== excludeUsername && users[u].displayName === displayName);
         }
 
+        function saveUsers() {
+            try {
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('Пользователи сохранены:', users);
+            } catch (e) {
+                console.error('Ошибка сохранения пользователей:', e);
+            }
+        }
+
+        function saveMessages() {
+            try {
+                localStorage.setItem('messages', JSON.stringify(messages));
+                console.log('Сообщения сохранены:', messages);
+            } catch (e) {
+                console.error('Ошибка сохранения сообщений:', e);
+            }
+        }
+
         function register() {
             const username = document.getElementById('registerUsername').value.trim();
             const displayName = document.getElementById('registerDisplayName').value.trim();
             const password = document.getElementById('registerPassword').value;
 
             if (!username || !displayName || !password) {
-                alert('Please fill all fields');
+                alert('Пожалуйста, заполните все поля');
                 return;
             }
 
             if (!isValidUsername(username)) {
-                alert('Username must contain only English letters and numbers (A-Z, a-z, 0-9)');
+                alert('Имя пользователя должно содержать только английские буквы и цифры (A-Z, a-z, 0-9)');
                 return;
             }
 
             if (users[username]) {
-                alert('This username is already taken');
+                alert('Это имя пользователя уже занято');
                 return;
             }
 
             if (isDisplayNameTaken(displayName)) {
-                alert('This display name is already taken');
+                alert('Это отображаемое имя уже занято');
                 return;
             }
 
@@ -493,8 +528,8 @@
                 notifications: true,
                 profilePicture: 'https://via.placeholder.com/100'
             };
-            localStorage.setItem('users', JSON.stringify(users));
-            alert('Registration successful! Please login.');
+            saveUsers();
+            alert('Регистрация успешна! Пожалуйста, войдите.');
             showLoginModal();
         }
 
@@ -503,13 +538,21 @@
             const password = document.getElementById('loginPassword').value;
 
             if (!users[username]) {
-                alert('User not found');
+                alert('Пользователь не найден');
                 return;
             }
 
-            const decrypted = CryptoJS.AES.decrypt(users[username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+            let decrypted;
+            try {
+                decrypted = CryptoJS.AES.decrypt(users[username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+            } catch (e) {
+                console.error('Ошибка расшифровки пароля:', e);
+                alert('Ошибка при обработке пароля');
+                return;
+            }
+
             if (decrypted !== password) {
-                alert('Incorrect password');
+                alert('Неверный пароль');
                 return;
             }
 
@@ -538,28 +581,35 @@
 
             if (username && username !== currentUser.username) {
                 if (!isValidUsername(username)) {
-                    alert('Username must contain only English letters and numbers (A-Z, a-z, 0-9)');
+                    alert('Имя пользователя должно содержать только английские буквы и цифры (A-Z, a-z, 0-9)');
                     return;
                 }
                 if (users[username]) {
-                    alert('This username is already taken');
+                    alert('Это имя пользователя уже занято');
                     return;
                 }
             }
 
             if (displayName && displayName !== currentUser.displayName && isDisplayNameTaken(displayName, currentUser.username)) {
-                alert('This display name is already taken');
+                alert('Это отображаемое имя уже занято');
                 return;
             }
 
             if (currentPassword || newPassword) {
                 if (!currentPassword || !newPassword) {
-                    alert('Please provide both current and new password');
+                    alert('Пожалуйста, укажите текущий и новый пароль');
                     return;
                 }
-                const decrypted = CryptoJS.AES.decrypt(users[currentUser.username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+                let decrypted;
+                try {
+                    decrypted = CryptoJS.AES.decrypt(users[currentUser.username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+                } catch (e) {
+                    console.error('Ошибка расшифровки пароля:', e);
+                    alert('Ошибка при обработке пароля');
+                    return;
+                }
                 if (decrypted !== currentPassword) {
-                    alert('Current password is incorrect');
+                    alert('Текущий пароль неверный');
                     return;
                 }
                 users[currentUser.username].password = CryptoJS.AES.encrypt(newPassword, AES_KEY).toString();
@@ -576,7 +626,7 @@
                 currentUser.displayName = displayName;
             }
 
-            if (status) {
+            if (status !== undefined) {
                 users[currentUser.username].status = status;
             }
 
@@ -586,17 +636,22 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     users[currentUser.username].profilePicture = e.target.result;
-                    localStorage.setItem('users', JSON.stringify(users));
+                    saveUsers();
                     document.getElementById('profilePicture').src = e.target.result;
                     updateUserList();
                 };
+                reader.onerror = function(e) {
+                    console.error('Ошибка загрузки изображения:', e);
+                    alert('Ошибка при загрузке изображения профиля');
+                };
                 reader.readAsDataURL(profilePictureInput.files[0]);
+            } else {
+                saveUsers();
+                updateUserList();
             }
 
-            localStorage.setItem('users', JSON.stringify(users));
-            alert('Settings updated');
+            alert('Настройки обновлены');
             closeSettings();
-            updateUserList();
         }
 
         function updateUserList(searchTerm = '') {
@@ -609,7 +664,7 @@
                         <img src="${users[username].profilePicture || 'https://via.placeholder.com/40'}" alt="User">
                         <div class="user-info">
                             <div>${users[username].displayName}</div>
-                            <div class="user-status">${users[username].status || 'No status'}</div>
+                            <div class="user-status">${users[username].status || 'Нет статуса'}</div>
                         </div>`;
                     li.onclick = () => selectUser(username);
                     userList.appendChild(li);
@@ -643,12 +698,12 @@
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
             messages[chatId].push(message);
-            localStorage.setItem('messages', JSON.stringify(messages));
+            saveMessages();
             input.value = '';
             updateMessages();
 
             if (users[currentChatUser].notifications) {
-                alert(`${users[currentChatUser].displayName} would receive a notification: New message from ${currentUser.displayName}`);
+                alert(`${users[currentChatUser].displayName} получил бы уведомление: Новое сообщение от ${currentUser.displayName}`);
             }
         }
 
@@ -657,7 +712,13 @@
             chatMessages.innerHTML = '';
             const chatId = [currentUser.username, currentChatUser].sort().join('_');
             (messages[chatId] || []).forEach(msg => {
-                const decrypted = CryptoJS.AES.decrypt(msg.text, AES_KEY).toString(CryptoJS.enc.Utf8);
+                let decrypted;
+                try {
+                    decrypted = CryptoJS.AES.decrypt(msg.text, AES_KEY).toString(CryptoJS.enc.Utf8);
+                } catch (e) {
+                    console.error('Ошибка расшифровки сообщения:', e);
+                    decrypted = '[Ошибка расшифровки]';
+                }
                 const div = document.createElement('div');
                 div.className = `message ${msg.sender === currentUser.username ? 'sent' : 'received'}`;
                 div.innerHTML = `${decrypted}<span class="message-time">${msg.time}</span>`;
@@ -666,7 +727,8 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Initialize
+        // Инициализация при загрузке страницы
+        initializeData();
         showLoginModal();
     </script>
 </body>
