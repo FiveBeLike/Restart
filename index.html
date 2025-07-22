@@ -50,13 +50,24 @@
         .user-search {
             padding: 10px;
             background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
         }
         .user-search input {
-            width: 100%;
+            flex-grow: 1;
             padding: 8px;
             border: 1px solid #e0e0e0;
-            border-radius: 5px;
+            border-radius: 5px 0 0 5px;
             font-size: 14px;
+        }
+        .user-search button {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-left: none;
+            border-radius: 0 5px 5px 0;
+            background-color: #0088cc;
+            color: #fff;
+            cursor: pointer;
         }
         .user-list {
             list-style: none;
@@ -78,6 +89,14 @@
             height: 40px;
             border-radius: 50%;
             margin-right: 10px;
+            object-fit: cover;
+        }
+        .user-list .user-info {
+            flex-grow: 1;
+        }
+        .user-list .user-status {
+            font-size: 12px;
+            color: #888;
         }
         .chat-area {
             flex-grow: 1;
@@ -175,6 +194,24 @@
             margin-bottom: 10px;
             border: 1px solid #e0e0e0;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .modal-content .password-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .modal-content .password-container input {
+            padding-right: 40px;
+        }
+        .modal-content .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
         }
         .modal-content button {
             background-color: #0088cc;
@@ -184,6 +221,16 @@
             border-radius: 5px;
             cursor: pointer;
             margin-right: 10px;
+        }
+        .modal-content input[type="file"] {
+            padding: 5px;
+        }
+        .modal-content img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
         }
         .sidebar-menu {
             display: none;
@@ -227,6 +274,10 @@
             border-color: #4a5b67;
             color: #fff;
         }
+        .dark-theme .user-search button {
+            background-color: #056162;
+            border-color: #4a5b67;
+        }
         .dark-theme .user-list li {
             border-bottom-color: #3a4b57;
         }
@@ -268,6 +319,9 @@
             border-color: #4a5b67;
             color: #fff;
         }
+        .dark-theme .modal-content .password-toggle {
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -285,7 +339,8 @@
                 </ul>
             </div>
             <div class="user-search">
-                <input type="text" id="userSearch" placeholder="Search users..." oninput="searchUsers()">
+                <input type="text" id="userSearch" placeholder="Search users...">
+                <button onclick="searchUsers()">🔍</button>
             </div>
             <ul class="user-list" id="userList"></ul>
         </div>
@@ -304,8 +359,11 @@
     <div class="modal" id="loginModal">
         <div class="modal-content">
             <h2>Login</h2>
-            <input type="text" id="loginPhone" placeholder="Phone Number">
-            <input type="password" id="loginPassword" placeholder="Password">
+            <input type="text" id="loginUsername" placeholder="Username (A-Z, a-z, 0-9)">
+            <div class="password-container">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button class="password-toggle" onmousedown="togglePassword('loginPassword')" onmouseup="togglePassword('loginPassword')" onmouseout="togglePassword('loginPassword')">👁️</button>
+            </div>
             <button onclick="login()">Login</button>
             <button onclick="showRegisterModal()">Register</button>
         </div>
@@ -314,9 +372,12 @@
     <div class="modal" id="registerModal">
         <div class="modal-content">
             <h2>Register</h2>
-            <input type="text" id="registerName" placeholder="Your Name">
-            <input type="text" id="registerPhone" placeholder="Phone Number">
-            <input type="password" id="registerPassword" placeholder="Password">
+            <input type="text" id="registerUsername" placeholder="Username (A-Z, a-z, 0-9)">
+            <input type="text" id="registerDisplayName" placeholder="Display Name">
+            <div class="password-container">
+                <input type="password" id="registerPassword" placeholder="Password">
+                <button class="password-toggle" onmousedown="togglePassword('registerPassword')" onmouseup="togglePassword('registerPassword')" onmouseout="togglePassword('registerPassword')">👁️</button>
+            </div>
             <button onclick="register()">Register</button>
             <button onclick="showLoginModal()">Back to Login</button>
         </div>
@@ -325,8 +386,20 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <h2>Settings</h2>
-            <input type="text" id="settingsName" placeholder="Change Name">
-            <input type="password" id="settingsPassword" placeholder="New Password">
+            <img id="profilePicture" src="https://via.placeholder.com/100" alt="Profile Picture">
+            <input type="file" id="profilePictureInput" accept="image/*">
+            <input type="text" id="settingsUsername" placeholder="Change Username (A-Z, a-z, 0-9)">
+            <input type="text" id="settingsDisplayName" placeholder="Change Display Name">
+            <input type="text" id="settingsStatus" placeholder="Status Message">
+            <div class="password-container">
+                <input type="password" id="settingsCurrentPassword" placeholder="Current Password">
+                <button class="password-toggle" onmousedown="togglePassword('settingsCurrentPassword')" onmouseup="togglePassword('settingsCurrentPassword')" onmouseout="togglePassword('settingsCurrentPassword')">👁️</button>
+            </div>
+            <div class="password-container">
+                <input type="password" id="settingsNewPassword" placeholder="New Password">
+                <button class="password-toggle" onmousedown="togglePassword('settingsNewPassword')" onmouseup="togglePassword('settingsNewPassword')" onmouseout="togglePassword('settingsNewPassword')">👁️</button>
+            </div>
+            <label><input type="checkbox" id="settingsNotifications" checked> Enable Notifications</label>
             <button onclick="updateSettings()">Save Changes</button>
             <button onclick="closeSettings()">Close</button>
         </div>
@@ -354,7 +427,11 @@
         function showSettings() {
             document.getElementById('settingsModal').style.display = 'flex';
             document.getElementById('sidebarMenu').style.display = 'none';
-            document.getElementById('settingsName').value = currentUser.name || '';
+            document.getElementById('settingsUsername').value = currentUser.username || '';
+            document.getElementById('settingsDisplayName').value = currentUser.displayName || '';
+            document.getElementById('settingsStatus').value = users[currentUser.username].status || '';
+            document.getElementById('settingsNotifications').checked = users[currentUser.username].notifications !== false;
+            document.getElementById('profilePicture').src = users[currentUser.username].profilePicture || 'https://via.placeholder.com/100';
         }
 
         function closeSettings() {
@@ -371,24 +448,50 @@
             document.getElementById('sidebarMenu').style.display = 'none';
         }
 
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function isValidUsername(username) {
+            return /^[A-Za-z0-9]+$/.test(username);
+        }
+
+        function isDisplayNameTaken(displayName, excludeUsername) {
+            return Object.keys(users).some(u => u !== excludeUsername && users[u].displayName === displayName);
+        }
+
         function register() {
-            const name = document.getElementById('registerName').value.trim();
-            const phone = document.getElementById('registerPhone').value.trim();
+            const username = document.getElementById('registerUsername').value.trim();
+            const displayName = document.getElementById('registerDisplayName').value.trim();
             const password = document.getElementById('registerPassword').value;
 
-            if (!name || !phone || !password) {
+            if (!username || !displayName || !password) {
                 alert('Please fill all fields');
                 return;
             }
 
-            if (users[phone]) {
-                alert('User already exists');
+            if (!isValidUsername(username)) {
+                alert('Username must contain only English letters and numbers (A-Z, a-z, 0-9)');
                 return;
             }
 
-            users[phone] = {
-                name,
-                password: CryptoJS.AES.encrypt(password, AES_KEY).toString()
+            if (users[username]) {
+                alert('This username is already taken');
+                return;
+            }
+
+            if (isDisplayNameTaken(displayName)) {
+                alert('This display name is already taken');
+                return;
+            }
+
+            users[username] = {
+                displayName,
+                password: CryptoJS.AES.encrypt(password, AES_KEY).toString(),
+                status: '',
+                notifications: true,
+                profilePicture: 'https://via.placeholder.com/100'
             };
             localStorage.setItem('users', JSON.stringify(users));
             alert('Registration successful! Please login.');
@@ -396,21 +499,21 @@
         }
 
         function login() {
-            const phone = document.getElementById('loginPhone').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            if (!users[phone]) {
+            if (!users[username]) {
                 alert('User not found');
                 return;
             }
 
-            const decrypted = CryptoJS.AES.decrypt(users[phone].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+            const decrypted = CryptoJS.AES.decrypt(users[username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
             if (decrypted !== password) {
                 alert('Incorrect password');
                 return;
             }
 
-            currentUser = { phone, name: users[phone].name };
+            currentUser = { username, displayName: users[username].displayName };
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('chatArea').style.display = 'flex';
             updateUserList();
@@ -425,52 +528,103 @@
         }
 
         function updateSettings() {
-            const name = document.getElementById('settingsName').value.trim();
-            const password = document.getElementById('settingsPassword').value;
+            const username = document.getElementById('settingsUsername').value.trim();
+            const displayName = document.getElementById('settingsDisplayName').value.trim();
+            const currentPassword = document.getElementById('settingsCurrentPassword').value;
+            const newPassword = document.getElementById('settingsNewPassword').value;
+            const status = document.getElementById('settingsStatus').value.trim();
+            const notifications = document.getElementById('settingsNotifications').checked;
+            const profilePictureInput = document.getElementById('profilePictureInput');
 
-            if (name) {
-                users[currentUser.phone].name = name;
-                currentUser.name = name;
+            if (username && username !== currentUser.username) {
+                if (!isValidUsername(username)) {
+                    alert('Username must contain only English letters and numbers (A-Z, a-z, 0-9)');
+                    return;
+                }
+                if (users[username]) {
+                    alert('This username is already taken');
+                    return;
+                }
             }
-            if (password) {
-                users[currentUser.phone].password = CryptoJS.AES.encrypt(password, AES_KEY).toString();
+
+            if (displayName && displayName !== currentUser.displayName && isDisplayNameTaken(displayName, currentUser.username)) {
+                alert('This display name is already taken');
+                return;
             }
+
+            if (currentPassword || newPassword) {
+                if (!currentPassword || !newPassword) {
+                    alert('Please provide both current and new password');
+                    return;
+                }
+                const decrypted = CryptoJS.AES.decrypt(users[currentUser.username].password, AES_KEY).toString(CryptoJS.enc.Utf8);
+                if (decrypted !== currentPassword) {
+                    alert('Current password is incorrect');
+                    return;
+                }
+                users[currentUser.username].password = CryptoJS.AES.encrypt(newPassword, AES_KEY).toString();
+            }
+
+            if (username && username !== currentUser.username) {
+                users[username] = { ...users[currentUser.username] };
+                delete users[currentUser.username];
+                currentUser.username = username;
+            }
+
+            if (displayName) {
+                users[currentUser.username].displayName = displayName;
+                currentUser.displayName = displayName;
+            }
+
+            if (status) {
+                users[currentUser.username].status = status;
+            }
+
+            users[currentUser.username].notifications = notifications;
+
+            if (profilePictureInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    users[currentUser.username].profilePicture = e.target.result;
+                    localStorage.setItem('users', JSON.stringify(users));
+                    document.getElementById('profilePicture').src = e.target.result;
+                    updateUserList();
+                };
+                reader.readAsDataURL(profilePictureInput.files[0]);
+            }
+
             localStorage.setItem('users', JSON.stringify(users));
             alert('Settings updated');
             closeSettings();
             updateUserList();
         }
 
-        function updateUserList() {
+        function updateUserList(searchTerm = '') {
             const userList = document.getElementById('userList');
             userList.innerHTML = '';
-            Object.keys(users).forEach(phone => {
-                if (phone !== currentUser.phone) {
+            Object.keys(users).forEach(username => {
+                if (username !== currentUser.username && (!searchTerm || users[username].displayName.toLowerCase().includes(searchTerm.toLowerCase()))) {
                     const li = document.createElement('li');
-                    li.innerHTML = `<img src="https://via.placeholder.com/40" alt="User">${users[phone].name}`;
-                    li.onclick = () => selectUser(phone);
+                    li.innerHTML = `
+                        <img src="${users[username].profilePicture || 'https://via.placeholder.com/40'}" alt="User">
+                        <div class="user-info">
+                            <div>${users[username].displayName}</div>
+                            <div class="user-status">${users[username].status || 'No status'}</div>
+                        </div>`;
+                    li.onclick = () => selectUser(username);
                     userList.appendChild(li);
                 }
             });
         }
 
         function searchUsers() {
-            const search = document.getElementById('userSearch').value.toLowerCase();
-            const userList = document.getElementById('userList');
-            userList.innerHTML = '';
-            Object.keys(users).forEach(phone => {
-                if (phone !== currentUser.phone && users[phone].name.toLowerCase().includes(search)) {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<img src="https://via.placeholder.com/40" alt="User">${users[phone].name}`;
-                    li.onclick = () => selectUser(phone);
-                    userList.appendChild(li);
-                }
-            });
+            const search = document.getElementById('userSearch').value;
+            updateUserList(search);
         }
 
-        function selectUser(phone) {
-            currentChatUser = phone;
-            document.getElementById('chatUser').textContent = users[phone].name;
+        function selectUser(username) {
+            currentChatUser = username;
+            document.getElementById('chatUser').textContent = users[username].displayName;
             document.getElementById('chatArea').style.display = 'flex';
             updateMessages();
         }
@@ -481,10 +635,10 @@
             if (!text || !currentChatUser) return;
 
             const encrypted = CryptoJS.AES.encrypt(text, AES_KEY).toString();
-            const chatId = [currentUser.phone, currentChatUser].sort().join('_');
+            const chatId = [currentUser.username, currentChatUser].sort().join('_');
             if (!messages[chatId]) messages[chatId] = [];
             const message = {
-                sender: currentUser.phone,
+                sender: currentUser.username,
                 text: encrypted,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
@@ -492,16 +646,20 @@
             localStorage.setItem('messages', JSON.stringify(messages));
             input.value = '';
             updateMessages();
+
+            if (users[currentChatUser].notifications) {
+                alert(`${users[currentChatUser].displayName} would receive a notification: New message from ${currentUser.displayName}`);
+            }
         }
 
         function updateMessages() {
             const chatMessages = document.getElementById('chatMessages');
             chatMessages.innerHTML = '';
-            const chatId = [currentUser.phone, currentChatUser].sort().join('_');
+            const chatId = [currentUser.username, currentChatUser].sort().join('_');
             (messages[chatId] || []).forEach(msg => {
                 const decrypted = CryptoJS.AES.decrypt(msg.text, AES_KEY).toString(CryptoJS.enc.Utf8);
                 const div = document.createElement('div');
-                div.className = `message ${msg.sender === currentUser.phone ? 'sent' : 'received'}`;
+                div.className = `message ${msg.sender === currentUser.username ? 'sent' : 'received'}`;
                 div.innerHTML = `${decrypted}<span class="message-time">${msg.time}</span>`;
                 chatMessages.appendChild(div);
             });
