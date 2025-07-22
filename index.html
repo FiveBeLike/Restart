@@ -1,6 +1,354 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Restart</title>
-  </head>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мессенджер</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            width: 400px;
+            max-height: 80vh;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .dark-theme {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .dark-theme .container {
+            background: #2a2a2a;
+        }
+        .dark-theme input, .dark-theme button {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+        .header {
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-area {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .message.sent {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+        }
+        .message.received {
+            background: #e0e0e0;
+            margin-right: auto;
+        }
+        .dark-theme .message.received {
+            background: #444;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+        input, button {
+            padding: 8px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+        .dark-theme .modal-content {
+            background: #2a2a2a;
+        }
+        .search-area {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .user-list {
+            max-height: 150px;
+            Overflow-y: auto;
+        }
+        .user-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .user-item:hover {
+            background: #f5f5f5;
+        }
+        .dark-theme .user-item:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2 id="authTitle">Регистрация</h2>
+            <input type="text" id="phone" placeholder="Номер телефона">
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <input type="password" id="password" placeholder="Пароль">
+            <button onclick="register()">Зарегистрироваться</button>
+            <button onclick="showLogin()">Уже есть аккаунт? Войти</button>
+        </div>
+    </div>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Вход</h2>
+            <input type="text" id="loginPhone" placeholder="Номер телефона">
+            <input type="password" id="loginPassword" placeholder="Пароль">
+            <button onclick="login()">Войти</button>
+            <button onclick="showRegister()">Нет аккаунта? Зарегистрироваться</button>
+            <button onclick="showChangePassword()">Сменить пароль</button>
+        </div>
+    </div>
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <h2>Смена пароля</h2>
+            <input type="text" id="changePhone" placeholder="Номер телефона">
+            <input type="password" id="newPassword" placeholder="Новый пароль">
+            <button onclick="changePassword()">Сменить пароль</button>
+            <button onclick="showLogin()">Вернуться к входу</button>
+        </div>
+    </div>
+    <div id="chatContainer" class="container" style="display:none;">
+        <div class="header">
+            <span id="currentUser"></span>
+            <div>
+                <button onclick="toggleTheme()">Сменить тему</button>
+                <button onclick="logout()">Выйти</button>
+            </div>
+        </div>
+        <div class="search-area">
+            <input type="text" id="searchUser" placeholder="Поиск пользователя">
+            <div id="userList" class="user-list"></div>
+        </div>
+        <div id="chatArea" class="chat-area"></div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Введите сообщение">
+            <button onclick="sendMessage()">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        const SECRET_KEY = 'my-secret-key-1234567890123456'; // 32 байта для AES-256
+        let currentUser = null;
+        let currentChatUser = null;
+
+        function showRegister() {
+            document.getElementById('authModal').style.display = 'flex';
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('changePasswordModal').style.display = 'none';
+        }
+
+        function showChangePassword() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        function register() {
+            const phone = document.getElementById('phone').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (phone && username && password) {
+                let users = JSON.parse(localStorage.getItem('users') || '[]');
+                if (users.find(u => u.phone === phone)) {
+                    alert('Пользователь с таким номером уже существует');
+                    return;
+                }
+                const encryptedPassword = CryptoJS.AES.encrypt(password, SECRET_KEY).toString();
+                users.push({ phone, username, password: encryptedPassword });
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Регистрация успешна! Теперь войдите.');
+                showLogin();
+            } else {
+                alert('Заполните все поля');
+            }
+        }
+
+        function login() {
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPassword').value;
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.phone === phone);
+            if (user) {
+                const decryptedPassword = CryptoJS.AES.decrypt(user.password, SECRET_KEY).toString(CryptoJS.enc.Utf8);
+                if (decryptedPassword === password) {
+                    currentUser = user;
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('chatContainer').style.display = 'flex';
+                    document.getElementById('currentUser').textContent = user.username;
+                    loadUsers();
+                } else {
+                    alert('Неверный пароль');
+                }
+            } else {
+                alert('Пользователь не найден');
+            }
+        }
+
+        function changePassword() {
+            const phone = document.getElementById('changePhone').value;
+            const newPassword = document.getElementById('newPassword').value;
+            let users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.phone === phone);
+            if (userIndex !== -1) {
+                users[userIndex].password = CryptoJS.AES.encrypt(newPassword, SECRET_KEY).toString();
+                localStorage.setItem('users', JSON.stringify(users));
+                alert('Пароль успешно изменен');
+                showLogin();
+            } else {
+                alert('Пользователь не найден');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentChatUser = null;
+            document.getElementById('chatContainer').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('chatArea').innerHTML = '';
+            document.getElementById('userList').innerHTML = '';
+        }
+
+        function loadUsers() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                if (user.phone !== currentUser.phone) {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.textContent = user.username;
+                    userItem.onclick = () => selectUser(user);
+                    userList.appendChild(userItem);
+                }
+            });
+        }
+
+        function selectUser(user) {
+            currentChatUser = user;
+            loadMessages();
+        }
+
+        function loadMessages() {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = '';
+            const chatId = [currentUser.phone, currentChatUser.phone].sort().join('_');
+            const messages = JSON.parse(localStorage.getItem(`messages_${chatId}`) || '[]');
+            messages.forEach(msg => {
+                const decryptedMessage = CryptoJS.AES.decrypt(msg.text, SECRET_KEY).toString(CryptoJS.enc.Utf8);
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender === currentUser.phone ? 'sent' : 'received'}`;
+                messageDiv.textContent = decryptedMessage;
+                chatArea.appendChild(messageDiv);
+            });
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const text = messageInput.value.trim();
+            if (text && currentChatUser) {
+                const chatId = [currentUser.phone, currentChatUser.phone].sort().join('_');
+                let messages = JSON.parse(localStorage.getItem(`messages_${chatId}`) || '[]');
+                const encryptedMessage = CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
+                messages.push({
+                    sender: currentUser.phone,
+                    text: encryptedMessage,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem(`messages_${chatId}`, JSON.stringify(messages));
+                messageInput.value = '';
+                loadMessages();
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        document.getElementById('searchUser').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                if (user.phone !== currentUser.phone && user.username.toLowerCase().includes(query)) {
+                    const userItem = document.createElement('div');
+                    userItem.className = 'user-item';
+                    userItem.textContent = user.username;
+                    userItem.onclick = () => selectUser(user);
+                    userList.appendChild(userItem);
+                }
+            });
+        });
+
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Показать форму входа при загрузке
+        showLogin();
+    </script>
+</body>
 </html>
